@@ -71,7 +71,7 @@ See [`LICENSES.md`](LICENSES.md) for third-party materials.
 
 | Registered member | GitHub username | Major contribution | Evidence |
 |---|---|---|---|
-| <Rehenuma Tarin Tuhi> | `<RehenumaOP>` | Full implementation: scheduling algorithm, UI components, testing | `src/lib/scheduler.ts`, `src/components/` |
+| `<Rehenuma Tarin Tuhi>` | `<RehenumaOP>` | Full implementation: scheduling algorithm, UI components, testing | `src/lib/scheduler.ts`, `src/components/` |
 
 Commit count alone does not represent contribution.
 
