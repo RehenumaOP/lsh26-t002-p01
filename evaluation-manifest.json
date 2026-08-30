@@ -1,0 +1,68 @@
+{
+  "team_id": "LSH26-T002",
+  "problem_id": "P01",
+  "repository_name": "lsh26-t002-p01",
+  "live_url": "<https://lsh26-t002-p01.netlify.app>",
+  "demo_video_url_optional": "<https://www.loom.com/share/c3184a6f496949f3825f6f5d5a71db43>",
+
+  "event_start_code": "<LSH26-8490-C900>",
+  "repository_created_before_release": true,
+  "pre_event_materials": [
+    "Vite + React + TypeScript scaffold",
+    "Tailwind CSS v4 configuration (@tailwindcss/vite)",
+    "@supabase/supabase-js package installed (unused in this problem)"
+  ],
+  "sample_data": {
+    "loads_published_fixture": true,
+    "method": "typed manually into the form, and separately loaded in an automated test file (src/lib/scheduler.test.ts)",
+    "reset_instructions": "Refresh the page. All data is held in React state for the session only; there is no persistence to clear."
+  },
+  "problem_solving_method": "Read the problem twice, wrote the 4 requirements and a data model in plain language before coding, then built a scheduler that places grid-power jobs first into cut-free windows (since only grid jobs have a hard timing constraint), then fills remaining time with generator/none jobs. Verified against all 25 published sample cases with an automated test checking no overlaps, no grid job inside a cut, and correct generator-minute totals.",
+  "requirements": {
+    "R1": {
+      "status": "complete",
+      "evidence": "Timeline component + power-cut input, top of the page"
+    },
+    "R2": {
+      "status": "complete",
+      "evidence": "JobForm component - add jobs with name, duration, power type"
+    },
+    "R3": {
+      "status": "complete",
+      "evidence": "src/lib/scheduler.ts - scheduleJobs(), verified against 25 public cases in scheduler.test.ts"
+    },
+    "R4": {
+      "status": "complete",
+      "evidence": "totalGeneratorMinutes shown live in App.tsx, recalculated via useMemo"
+    }
+  },
+  "team_members": [
+    {
+      "registered_name": "<Rehenuma Tarin Tuhi>",
+      "github_username": "<RehenumaOP>",
+      "major_contribution": "Full implementation of P01: scheduling algorithm, all UI components, automated test suite, deployment",
+      "evidence_paths_or_commits": [
+        "src/lib/scheduler.ts",
+        "src/components/Timeline.tsx",
+        "src/lib/scheduler.test.ts"
+      ]
+    }
+  ],
+  "major_design_decisions": [
+    "No backend or database used - the problem only needs session-level state, so adding Supabase would add unnecessary complexity",
+    "Grid jobs scheduled before generator/none jobs, since only grid jobs have a hard constraint (avoiding power cuts)"
+  ],
+  "known_limitations": [
+    "Jobs are placed first-fit in the order added, not optimized for minimal generator usage",
+    "Shop open/close times are hardcoded, not yet user-editable in the UI"
+  ],
+  "ai_tools_used": [
+    {
+      "tool": "Claude (Anthropic),ChatGPT (OpenAI)",
+      "used_for": "Designing the scheduling algorithm, writing React components, debugging TypeScript/build configuration errors, writing the automated test suite against published sample cases",
+      "how_output_was_verified": "Every code chunk was read and understood before acceptance; the scheduler was independently verified by running automated tests against all 25 published fixture cases, confirming no invalid overlaps and correct generator-minute totals"
+    }
+  ],
+  "licenses_file": "LICENSES.md",
+  "declaration": "The information above is complete and truthful to the best of the team's knowledge."
+}
