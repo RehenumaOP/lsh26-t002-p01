@@ -1,122 +1,103 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useMemo } from "react";
+import type { Job, PowerCut, PowerType } from "./types";
+import { timeToMinutes, scheduleJobs } from "./lib/scheduler";
+import Timeline from "./components/Timeline";
+import JobForm from "./components/JobForm";
+import JobList from "./components/JobList";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  // Shop hours — hardcoded for now, could become inputs later
+  const [shopOpen] = useState("09:00");
+  const [shopClose] = useState("21:00");
+
+  const [powerCuts, setPowerCuts] = useState<PowerCut[]>([]);
+  const [cutStart, setCutStart] = useState("");
+  const [cutEnd, setCutEnd] = useState("");
+
+  const [jobs, setJobs] = useState<Job[]>([]);
+
+  const shopOpenMinutes = timeToMinutes(shopOpen);
+  const shopCloseMinutes = timeToMinutes(shopClose);
+
+  // Add a new power cut from the two time inputs
+  const handleAddCut = () => {
+    if (!cutStart || !cutEnd) return;
+    setPowerCuts([
+      ...powerCuts,
+      {
+        id: crypto.randomUUID(),
+        startMinutes: timeToMinutes(cutStart),
+        endMinutes: timeToMinutes(cutEnd),
+      },
+    ]);
+    setCutStart("");
+    setCutEnd("");
+  };
+
+  const handleAddJob = (name: string, durationMinutes: number, powerType: PowerType) => {
+    setJobs([
+      ...jobs,
+      { id: crypto.randomUUID(), name, durationMinutes, powerType, startMinutes: null },
+    ]);
+  };
+
+  const handleRemoveJob = (id: string) => {
+    setJobs(jobs.filter((j) => j.id !== id));
+  };
+
+  // Recalculate the schedule any time jobs or power cuts change.
+  // useMemo avoids re-running this on every unrelated re-render.
+  const { jobs: scheduledJobs, totalGeneratorMinutes } = useMemo(
+    () => scheduleJobs(jobs, powerCuts, shopOpenMinutes, shopCloseMinutes),
+    [jobs, powerCuts, shopOpenMinutes, shopCloseMinutes]
+  );
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-xl font-bold mb-4">Load-Shedding Window Planner</h1>
+
+      {/* Bullet 1: enter power cuts */}
+      <section className="mb-6">
+        <h2 className="font-semibold mb-2">Power cuts today</h2>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="time"
+            className="border rounded px-2 py-1"
+            value={cutStart}
+            onChange={(e) => setCutStart(e.target.value)}
+          />
+          <input
+            type="time"
+            className="border rounded px-2 py-1"
+            value={cutEnd}
+            onChange={(e) => setCutEnd(e.target.value)}
+          />
+          <button onClick={handleAddCut} className="bg-red-500 text-white px-3 py-1 rounded">
+            Add cut
+          </button>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+
+        <Timeline
+          shopOpenMinutes={shopOpenMinutes}
+          shopCloseMinutes={shopCloseMinutes}
+          powerCuts={powerCuts}
+          jobs={scheduledJobs}
+        />
       </section>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
+      {/* Bullet 2: add jobs */}
+      <section className="mb-6">
+        <h2 className="font-semibold mb-2">Jobs</h2>
+        <JobForm onAddJob={handleAddJob} />
+        <JobList jobs={scheduledJobs} onRemoveJob={handleRemoveJob} />
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Bullet 4: live generator minutes total */}
+      <section className="bg-yellow-50 border border-yellow-300 rounded p-3">
+        <p className="font-medium">
+          Total generator minutes needed: <span className="text-lg">{totalGeneratorMinutes}</span>
+        </p>
+      </section>
+    </div>
+  );
 }
-
-export default App
